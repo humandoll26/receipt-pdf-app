@@ -19,36 +19,64 @@
         <a class="button button-secondary" href="./index.html">新規発行へ</a>
         <a class="button button-secondary" href="./settings.html">発行者設定</a>
         <a class="button button-ghost" href="./guide.html">使い方と保存仕様</a>
-        <label class="field search-field">
-          <span>取り込みモード</span>
-          <select id="import-mode-select">
-            <option value="skip">新しいものだけ追加する</option>
-            <option value="merge">同じ領収書は更新する</option>
-            <option value="replace">今の履歴をすべて入れ替える</option>
-          </select>
-        </label>
-        <button id="export-json-button" class="button button-secondary" type="button">JSON書き出し</button>
-        <button id="import-json-button" class="button button-secondary" type="button">JSON読み込み</button>
-        <button id="select-all-button" class="button button-ghost" type="button">全選択</button>
-        <button id="delete-selected-button" class="button button-danger" type="button" disabled>選択削除</button>
-        <input id="import-json-input" type="file" accept="application/json" hidden>
       </div>
-      <div class="toolbar">
-        <label class="field search-field">
-          <span>検索</span>
-          <input id="history-search-input" type="search" placeholder="宛名、番号、発行日、発行者名で検索">
-        </label>
-        <label class="field search-field">
-          <span>並び順</span>
-          <select id="history-sort-select">
-            <option value="updatedAt_desc">更新日時が新しい順</option>
-            <option value="issueDate_desc">発行日が新しい順</option>
-            <option value="issueDate_asc">発行日が古い順</option>
-            <option value="receiptNumber_desc">番号が大きい順</option>
-            <option value="receiptNumber_asc">番号が小さい順</option>
-          </select>
-        </label>
-      </div>
+
+      <section class="panel-group">
+        <div class="panel-group-head">
+          <h2>バックアップ・移行</h2>
+          <p>保存済み履歴をJSONで書き出したり、別ブラウザや別PCのデータを取り込みます。</p>
+        </div>
+        <div class="toolbar">
+          <button id="export-json-button" class="button button-secondary" type="button">JSON書き出し</button>
+          <button id="import-json-button" class="button button-secondary" type="button">JSON読み込み</button>
+          <input id="import-json-input" type="file" accept="application/json" hidden>
+        </div>
+        <div class="toolbar">
+          <label class="field search-field">
+            <span>取り込みモード</span>
+            <select id="import-mode-select">
+              <option value="skip">新しいものだけ追加する</option>
+              <option value="merge">同じ領収書は更新する</option>
+              <option value="replace">今の履歴をすべて入れ替える</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="panel-group">
+        <div class="panel-group-head">
+          <h2>検索・表示</h2>
+          <p>履歴の件数が増えても探しやすいように、検索と並び順をここで切り替えます。</p>
+        </div>
+        <div class="toolbar">
+          <label class="field search-field">
+            <span>検索</span>
+            <input id="history-search-input" type="search" placeholder="宛名、番号、発行日、発行者名で検索">
+          </label>
+          <label class="field search-field">
+            <span>並び順</span>
+            <select id="history-sort-select">
+              <option value="updatedAt_desc">更新日時が新しい順</option>
+              <option value="issueDate_desc">発行日が新しい順</option>
+              <option value="issueDate_asc">発行日が古い順</option>
+              <option value="receiptNumber_desc">番号が大きい順</option>
+              <option value="receiptNumber_asc">番号が小さい順</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="panel-group panel-group-danger">
+        <div class="panel-group-head">
+          <h2>履歴整理</h2>
+          <p>選択した履歴をまとめて削除します。削除前にJSON書き出しをしておくと安全です。</p>
+        </div>
+        <div class="toolbar">
+          <button id="select-all-button" class="button button-ghost" type="button">全選択</button>
+          <button id="delete-selected-button" class="button button-danger" type="button" disabled>選択削除</button>
+        </div>
+      </section>
+
       <div id="history-error" class="alert alert-error" hidden></div>
       <div id="history-status" class="alert alert-info" hidden></div>
       <div id="history-empty" class="empty" hidden>

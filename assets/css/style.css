@@ -163,6 +163,38 @@ select {
   gap: 16px;
 }
 
+.panel-group {
+  display: grid;
+  gap: 12px;
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+}
+
+.panel-group:first-of-type {
+  border-top: none;
+  padding-top: 4px;
+}
+
+.panel-group-head {
+  display: grid;
+  gap: 6px;
+}
+
+.panel-group-head h2 {
+  margin: 0;
+  font-size: 1.02rem;
+}
+
+.panel-group-head p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.panel-group-danger .panel-group-head p {
+  color: #7f1d1d;
+}
+
 .guide-block {
   display: grid;
   gap: 8px;
