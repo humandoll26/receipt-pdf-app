@@ -1,5 +1,5 @@
 export const DOC_TYPE = "receipt";
-export const TEMPLATE_VERSION = "receipt_v2_invoice";
+export const TEMPLATE_VERSION = "receipt_v3_invoice_toggle";
 
 export function qs(selector, root = document) {
   return root.querySelector(selector);
@@ -67,6 +67,10 @@ export function calculateTaxBreakdown(amount, taxCategory, taxMode) {
   };
 }
 
+export function normalizeInvoiceIssuerStatus(value) {
+  return value === "standard" ? "standard" : "invoice";
+}
+
 export function formatDate(dateString) {
   if (!dateString) return "";
   const date = new Date(dateString);
@@ -106,6 +110,7 @@ export function buildReceiptRecord(
   receiptNumber = 1
 ) {
   const timestamp = nowIso();
+  const invoiceIssuerStatus = normalizeInvoiceIssuerStatus(fields.invoiceIssuerStatus);
   const taxBreakdown = calculateTaxBreakdown(fields.amount, fields.taxCategory, fields.taxMode);
   return {
     id: existingId,
@@ -114,11 +119,15 @@ export function buildReceiptRecord(
     receiptNumber,
     issueDate: fields.issueDate,
     customerName: fields.customerName,
+    invoiceIssuerStatus,
+    isInvoiceIssuer: invoiceIssuerStatus === "invoice",
     amount: Number(fields.amount),
     purpose: fields.purpose,
     issuerName: fields.issuerName,
     issuerAddress: fields.issuerAddress || "",
-    issuerRegistrationNumber: normalizeRegistrationNumber(fields.issuerRegistrationNumber),
+    issuerRegistrationNumber: invoiceIssuerStatus === "invoice"
+      ? normalizeRegistrationNumber(fields.issuerRegistrationNumber)
+      : "",
     ...taxBreakdown,
     amountText: amountToDisplayText(taxBreakdown.totalAmount),
     note: fields.note || "",
@@ -136,6 +145,7 @@ export function serializeForm(form) {
     issueDate: `${formData.get("issueDate") || ""}`.trim(),
     issuerName: `${formData.get("issuerName") || ""}`.trim(),
     issuerAddress: `${formData.get("issuerAddress") || ""}`.trim(),
+    invoiceIssuerStatus: normalizeInvoiceIssuerStatus(formData.get("invoiceIssuerStatus")),
     issuerRegistrationNumber: normalizeRegistrationNumber(formData.get("issuerRegistrationNumber")),
     taxCategory: `${formData.get("taxCategory") || "10"}`.trim(),
     taxMode: `${formData.get("taxMode") || "inclusive"}`.trim(),
@@ -150,6 +160,7 @@ export function populateForm(form, record) {
   form.elements.issueDate.value = record.issueDate || "";
   form.elements.issuerName.value = record.issuerName || "";
   form.elements.issuerAddress.value = record.issuerAddress || "";
+  form.elements.invoiceIssuerStatus.value = record.invoiceIssuerStatus || (record.isInvoiceIssuer === false ? "standard" : "invoice");
   form.elements.issuerRegistrationNumber.value = record.issuerRegistrationNumber || "";
   form.elements.taxCategory.value = record.taxCategory || "10";
   form.elements.taxMode.value = record.taxMode || "inclusive";
@@ -187,18 +198,32 @@ export function validateReceiptFields(fields) {
   if (!fields.purpose) errors.push("但し書きを入力してください。");
   if (!fields.issueDate) errors.push("発行日を入力してください。");
   if (!fields.issuerName) errors.push("発行者名を入力してください。");
-  if (!fields.issuerRegistrationNumber) {
-    errors.push("登録番号を入力してください。");
-  } else if (!/^T\d{13}$/.test(fields.issuerRegistrationNumber)) {
-    errors.push("登録番号は T から始まる14文字で入力してください。");
+  if (!["invoice", "standard"].includes(fields.invoiceIssuerStatus)) {
+    errors.push("発行区分を選択してください。");
   }
-  if (!["10", "8", "0"].includes(fields.taxCategory)) {
-    errors.push("税率区分を選択してください。");
-  }
-  if (!["inclusive", "exclusive"].includes(fields.taxMode)) {
-    errors.push("税計算方式を選択してください。");
+  if (fields.invoiceIssuerStatus === "invoice") {
+    if (!fields.issuerRegistrationNumber) {
+      errors.push("登録番号を入力してください。");
+    } else if (!/^T\d{13}$/.test(fields.issuerRegistrationNumber)) {
+      errors.push("登録番号は T から始まる14文字で入力してください。");
+    }
+    if (!["10", "8", "0"].includes(fields.taxCategory)) {
+      errors.push("税率区分を選択してください。");
+    }
+    if (!["inclusive", "exclusive"].includes(fields.taxMode)) {
+      errors.push("税計算方式を選択してください。");
+    }
   }
   return errors;
+}
+
+export function syncInvoiceFields(form) {
+  const invoiceIssuerStatus = normalizeInvoiceIssuerStatus(form.elements.invoiceIssuerStatus.value);
+  const invoiceFields = form.querySelectorAll(".invoice-field");
+  const isInvoice = invoiceIssuerStatus === "invoice";
+  invoiceFields.forEach((field) => {
+    field.hidden = !isInvoice;
+  });
 }
 
 export function setBusyState(buttons, isBusy, busyLabel = "処理中...") {

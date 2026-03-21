@@ -9,6 +9,7 @@ import {
   serializeForm,
   setBusyState,
   showError,
+  syncInvoiceFields,
   validateReceiptFields,
 } from "./utils.js";
 
@@ -18,10 +19,18 @@ const generateButton = qs("#generate-button");
 const clearButton = qs("#clear-button");
 
 form.elements.issueDate.value = getTodayString();
+syncInvoiceFields(form);
+
+form.elements.invoiceIssuerStatus.addEventListener("change", () => {
+  syncInvoiceFields(form);
+  clearError(errorBox);
+});
 
 clearButton.addEventListener("click", () => {
   form.reset();
   form.elements.issueDate.value = getTodayString();
+  form.elements.invoiceIssuerStatus.value = "invoice";
+  syncInvoiceFields(form);
   clearError(errorBox);
 });
 

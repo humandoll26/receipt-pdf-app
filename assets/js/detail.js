@@ -10,6 +10,7 @@ import {
   serializeForm,
   setBusyState,
   showError,
+  syncInvoiceFields,
   validateReceiptFields,
 } from "./utils.js";
 
@@ -49,6 +50,7 @@ async function loadRecord() {
     }
 
     populateForm(form, currentRecord);
+    syncInvoiceFields(form);
     syncMeta(currentRecord);
   } catch (error) {
     showError(errorBox, error instanceof Error ? error.message : "領収書の読み込みに失敗しました。");
@@ -83,6 +85,11 @@ form.addEventListener("submit", async (event) => {
   } finally {
     setBusyState([saveButton, downloadButton, deleteButton], false);
   }
+});
+
+form.elements.invoiceIssuerStatus.addEventListener("change", () => {
+  syncInvoiceFields(form);
+  clearError(errorBox);
 });
 
 downloadButton.addEventListener("click", async () => {

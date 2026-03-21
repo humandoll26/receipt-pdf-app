@@ -18,6 +18,14 @@
       <div id="detail-error" class="alert alert-error" hidden></div>
       <form id="detail-form" class="form" novalidate>
         <label class="field">
+          <span>発行区分 <em>必須</em></span>
+          <select name="invoiceIssuerStatus" required>
+            <option value="invoice">インボイス対応あり</option>
+            <option value="standard">通常の領収書</option>
+          </select>
+        </label>
+
+        <label class="field">
           <span>宛名 <em>必須</em></span>
           <input type="text" name="customerName" required>
         </label>
@@ -27,7 +35,7 @@
           <input type="number" name="amount" inputmode="numeric" min="0" step="1" required>
         </label>
 
-        <label class="field">
+        <label class="field invoice-field">
           <span>税率区分 <em>必須</em></span>
           <select name="taxCategory" required>
             <option value="10">10% 対象</option>
@@ -36,7 +44,7 @@
           </select>
         </label>
 
-        <label class="field">
+        <label class="field invoice-field">
           <span>税計算方式 <em>必須</em></span>
           <select name="taxMode" required>
             <option value="inclusive">内税</option>
@@ -64,7 +72,7 @@
           <textarea name="issuerAddress" rows="3"></textarea>
         </label>
 
-        <label class="field">
+        <label class="field invoice-field">
           <span>登録番号 <em>必須</em></span>
           <input type="text" name="issuerRegistrationNumber" placeholder="T1234567890123" required>
         </label>

@@ -116,6 +116,10 @@ select {
   resize: vertical;
 }
 
+.field[hidden] {
+  display: none;
+}
+
 .field input:focus,
 .field textarea:focus,
 .field select:focus {
