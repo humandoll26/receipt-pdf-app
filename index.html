@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>領収書PDF発行アプリ</title>
+  <meta name="description" content="領収書PDFをブラウザで生成し、履歴をIndexedDBに保存できる完全クライアントサイドのWebアプリです。">
+  <link rel="stylesheet" href="./assets/css/style.css">
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <p class="eyebrow">Receipt PDF App</p>
+      <h1>領収書PDF発行</h1>
+      <p class="lead">入力した内容を保存し、日本語対応の領収書PDFをその場で出力します。</p>
+    </section>
+
+    <section class="panel">
+      <div id="form-error" class="alert alert-error" hidden></div>
+      <form id="receipt-form" class="form" novalidate>
+        <label class="field">
+          <span>宛名 <em>必須</em></span>
+          <input type="text" name="customerName" autocomplete="name" required>
+        </label>
+
+        <label class="field">
+          <span>金額 <em>必須</em></span>
+          <input type="number" name="amount" inputmode="numeric" min="0" step="1" required>
+        </label>
+
+        <label class="field">
+          <span>但し書き <em>必須</em></span>
+          <input type="text" name="purpose" required>
+        </label>
+
+        <label class="field">
+          <span>発行日 <em>必須</em></span>
+          <input type="date" name="issueDate" required>
+        </label>
+
+        <label class="field">
+          <span>発行者名 <em>必須</em></span>
+          <input type="text" name="issuerName" required>
+        </label>
+
+        <label class="field">
+          <span>発行者住所</span>
+          <textarea name="issuerAddress" rows="3"></textarea>
+        </label>
+
+        <label class="field">
+          <span>備考</span>
+          <textarea name="note" rows="3"></textarea>
+        </label>
+
+        <div class="actions">
+          <button id="generate-button" class="button button-primary" type="submit">PDF生成</button>
+          <button id="clear-button" class="button button-secondary" type="button">入力クリア</button>
+          <a class="button button-ghost" href="./history.html">履歴へ</a>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script type="module" src="./assets/js/app.js"></script>
+</body>
+</html>

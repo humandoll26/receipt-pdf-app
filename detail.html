@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>領収書詳細</title>
+  <link rel="stylesheet" href="./assets/css/style.css">
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <p class="eyebrow">Receipt Detail</p>
+      <h1>領収書詳細</h1>
+      <p class="lead">保存済みデータを編集し、再保存やPDF再生成ができます。</p>
+    </section>
+
+    <section class="panel">
+      <div id="detail-error" class="alert alert-error" hidden></div>
+      <form id="detail-form" class="form" novalidate>
+        <label class="field">
+          <span>宛名 <em>必須</em></span>
+          <input type="text" name="customerName" required>
+        </label>
+
+        <label class="field">
+          <span>金額 <em>必須</em></span>
+          <input type="number" name="amount" inputmode="numeric" min="0" step="1" required>
+        </label>
+
+        <label class="field">
+          <span>但し書き <em>必須</em></span>
+          <input type="text" name="purpose" required>
+        </label>
+
+        <label class="field">
+          <span>発行日 <em>必須</em></span>
+          <input type="date" name="issueDate" required>
+        </label>
+
+        <label class="field">
+          <span>発行者名 <em>必須</em></span>
+          <input type="text" name="issuerName" required>
+        </label>
+
+        <label class="field">
+          <span>発行者住所</span>
+          <textarea name="issuerAddress" rows="3"></textarea>
+        </label>
+
+        <label class="field">
+          <span>備考</span>
+          <textarea name="note" rows="3"></textarea>
+        </label>
+
+        <div class="meta-block">
+          <p id="detail-created-at"></p>
+          <p id="detail-updated-at"></p>
+        </div>
+
+        <div class="actions">
+          <button id="save-button" class="button button-primary" type="submit">更新保存</button>
+          <button id="download-button" class="button button-secondary" type="button">PDF再生成</button>
+          <button id="delete-button" class="button button-danger" type="button">削除</button>
+          <a class="button button-ghost" href="./history.html">一覧へ戻る</a>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script type="module" src="./assets/js/detail.js"></script>
+</body>
+</html>

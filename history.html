@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>領収書履歴一覧</title>
+  <link rel="stylesheet" href="./assets/css/style.css">
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <p class="eyebrow">Receipt History</p>
+      <h1>保存済み履歴</h1>
+      <p class="lead">更新日時の新しい順で保存済みの領収書を表示します。</p>
+    </section>
+
+    <section class="panel">
+      <div class="toolbar">
+        <a class="button button-secondary" href="./index.html">新規発行へ</a>
+      </div>
+      <div id="history-error" class="alert alert-error" hidden></div>
+      <div id="history-empty" class="empty" hidden>
+        <p>保存済みの領収書はありません。</p>
+      </div>
+      <div id="history-list" class="history-list" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script type="module" src="./assets/js/history.js"></script>
+</body>
+</html>
