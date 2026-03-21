@@ -1,6 +1,12 @@
 import { PDFDocument, StandardFonts, rgb } from "https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/+esm";
 import fontkit from "https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@1.1.1/+esm";
-import { buildReceiptFileName, downloadBlob, formatCurrency, formatDate, formatReceiptNumber } from "./utils.js";
+import {
+  buildReceiptFileName,
+  downloadBlob,
+  formatCurrency,
+  formatDate,
+  formatReceiptNumber,
+} from "./utils.js";
 
 const TEMPLATE_PATH = "./assets/templates/receipt-template.pdf";
 const FONT_PATH = "./assets/fonts/YuMincho.ttf";
@@ -163,7 +169,7 @@ export async function createReceiptPdfBytes(record) {
 
   page.drawText("発行者", {
     x: 52,
-    y: height - 492,
+    y: height - 484,
     size: 12,
     font: jpFont,
     color: soft,
@@ -171,15 +177,31 @@ export async function createReceiptPdfBytes(record) {
 
   drawMultiline(page, jpFont, record.issuerName, {
     x: 120,
-    y: height - 492,
+    y: height - 484,
     size: 14,
     lineHeight: 20,
     maxWidth: width - 172,
   });
 
+  page.drawText("登録番号", {
+    x: 52,
+    y: height - 528,
+    size: 12,
+    font: jpFont,
+    color: soft,
+  });
+
+  page.drawText(record.issuerRegistrationNumber || "-", {
+    x: 120,
+    y: height - 528,
+    size: 12,
+    font: helveticaBold,
+    color: ink,
+  });
+
   page.drawText("住所", {
     x: 52,
-    y: height - 548,
+    y: height - 572,
     size: 12,
     font: jpFont,
     color: soft,
@@ -187,15 +209,35 @@ export async function createReceiptPdfBytes(record) {
 
   drawMultiline(page, jpFont, record.issuerAddress || "-", {
     x: 120,
-    y: height - 548,
+    y: height - 572,
     size: 12,
     lineHeight: 18,
     maxWidth: width - 172,
   });
 
+  page.drawText("税区分", {
+    x: 52,
+    y: height - 648,
+    size: 12,
+    font: jpFont,
+    color: soft,
+  });
+
+  page.drawText(
+    `${record.taxRateLabel || "10%対象"} / 対象額 ${formatCurrency(record.taxableAmount || 0)} / 消費税 ${formatCurrency(record.taxAmount || 0)}`,
+    {
+      x: 120,
+      y: height - 648,
+      size: 11,
+      font: jpFont,
+      color: ink,
+      maxWidth: width - 172,
+    }
+  );
+
   page.drawText("備考", {
     x: 52,
-    y: height - 644,
+    y: height - 694,
     size: 12,
     font: jpFont,
     color: soft,
@@ -203,7 +245,7 @@ export async function createReceiptPdfBytes(record) {
 
   drawMultiline(page, jpFont, record.note || "-", {
     x: 120,
-    y: height - 644,
+    y: height - 694,
     size: 12,
     lineHeight: 18,
     maxWidth: width - 172,

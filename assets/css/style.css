@@ -36,7 +36,8 @@ a {
 
 button,
 input,
-textarea {
+textarea,
+select {
   font: inherit;
 }
 
@@ -101,7 +102,8 @@ textarea {
 }
 
 .field input,
-.field textarea {
+.field textarea,
+.field select {
   width: 100%;
   padding: 14px 16px;
   border: 1px solid var(--line);
@@ -115,7 +117,8 @@ textarea {
 }
 
 .field input:focus,
-.field textarea:focus {
+.field textarea:focus,
+.field select:focus {
   outline: 3px solid rgba(21, 71, 52, 0.18);
   border-color: var(--accent);
 }

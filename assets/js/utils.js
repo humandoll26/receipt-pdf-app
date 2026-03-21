@@ -1,5 +1,5 @@
 export const DOC_TYPE = "receipt";
-export const TEMPLATE_VERSION = "receipt_v1";
+export const TEMPLATE_VERSION = "receipt_v2_invoice";
 
 export function qs(selector, root = document) {
   return root.querySelector(selector);
@@ -18,6 +18,32 @@ export function nowIso() {
 
 export function formatCurrency(value) {
   return `¥${Number(value).toLocaleString("ja-JP")}`;
+}
+
+export function normalizeRegistrationNumber(value) {
+  return `${value || ""}`.trim().toUpperCase();
+}
+
+export function calculateTaxBreakdown(amount, taxCategory) {
+  const total = Number(amount) || 0;
+  const rate = Number(taxCategory) || 0;
+  if (rate <= 0) {
+    return {
+      taxCategory: "0",
+      taxRateLabel: "非課税",
+      taxableAmount: total,
+      taxAmount: 0,
+    };
+  }
+
+  const taxableAmount = Math.floor((total * 100) / (100 + rate));
+  const taxAmount = total - taxableAmount;
+  return {
+    taxCategory: String(rate),
+    taxRateLabel: `${rate}%対象`,
+    taxableAmount,
+    taxAmount,
+  };
 }
 
 export function formatDate(dateString) {
@@ -71,6 +97,8 @@ export function buildReceiptRecord(
     purpose: fields.purpose,
     issuerName: fields.issuerName,
     issuerAddress: fields.issuerAddress || "",
+    issuerRegistrationNumber: normalizeRegistrationNumber(fields.issuerRegistrationNumber),
+    ...calculateTaxBreakdown(fields.amount, fields.taxCategory),
     note: fields.note || "",
     createdAt,
     updatedAt: timestamp,
@@ -86,6 +114,8 @@ export function serializeForm(form) {
     issueDate: `${formData.get("issueDate") || ""}`.trim(),
     issuerName: `${formData.get("issuerName") || ""}`.trim(),
     issuerAddress: `${formData.get("issuerAddress") || ""}`.trim(),
+    issuerRegistrationNumber: normalizeRegistrationNumber(formData.get("issuerRegistrationNumber")),
+    taxCategory: `${formData.get("taxCategory") || "10"}`.trim(),
     note: `${formData.get("note") || ""}`.trim(),
   };
 }
@@ -97,6 +127,8 @@ export function populateForm(form, record) {
   form.elements.issueDate.value = record.issueDate || "";
   form.elements.issuerName.value = record.issuerName || "";
   form.elements.issuerAddress.value = record.issuerAddress || "";
+  form.elements.issuerRegistrationNumber.value = record.issuerRegistrationNumber || "";
+  form.elements.taxCategory.value = record.taxCategory || "10";
   form.elements.note.value = record.note || "";
 }
 
@@ -131,6 +163,14 @@ export function validateReceiptFields(fields) {
   if (!fields.purpose) errors.push("但し書きを入力してください。");
   if (!fields.issueDate) errors.push("発行日を入力してください。");
   if (!fields.issuerName) errors.push("発行者名を入力してください。");
+  if (!fields.issuerRegistrationNumber) {
+    errors.push("登録番号を入力してください。");
+  } else if (!/^T\d{13}$/.test(fields.issuerRegistrationNumber)) {
+    errors.push("登録番号は T から始まる14文字で入力してください。");
+  }
+  if (!["10", "8", "0"].includes(fields.taxCategory)) {
+    errors.push("税率区分を選択してください。");
+  }
   return errors;
 }
 
