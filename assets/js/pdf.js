@@ -3,7 +3,7 @@ import fontkit from "https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@1.1.1/+esm";
 import { buildReceiptFileName, downloadBlob, formatCurrency, formatDate } from "./utils.js";
 
 const TEMPLATE_PATH = "./assets/templates/receipt-template.pdf";
-const FONT_PATH = "./assets/fonts/NotoSansJP-Regular.ttf";
+const FONT_PATH = "./assets/fonts/YuMincho.ttf";
 
 async function fetchArrayBuffer(path) {
   const response = await fetch(path);
@@ -41,7 +41,6 @@ export async function createReceiptPdfBytes(record) {
   pdfDoc.registerFontkit(fontkit);
 
   const fontBytes = await fetchArrayBuffer(FONT_PATH);
-  // Variable CJK fonts can lose glyphs when subset embedding is used.
   const jpFont = await pdfDoc.embedFont(fontBytes, { subset: false });
   const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);

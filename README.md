@@ -27,7 +27,7 @@ GitHub Pages で動作する、完全クライアントサイドの領収書PDF�
 ## PDF
 
 - テンプレート: `assets/templates/receipt-template.pdf`
-- フォント: `assets/fonts/NotoSansJP-Regular.ttf`
+- フォント: `assets/fonts/YuMincho.ttf`
 
 テンプレート PDF の読み込みに失敗した場合でも、新規 PDF を生成して出力を継続します。
 
