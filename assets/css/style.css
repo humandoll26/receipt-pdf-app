@@ -251,6 +251,12 @@ select {
   color: #7f1d1d;
 }
 
+.alert-info {
+  background: #eef6f1;
+  border: 1px solid #bfd7c8;
+  color: var(--accent-strong);
+}
+
 .history-list {
   display: grid;
   gap: 12px;

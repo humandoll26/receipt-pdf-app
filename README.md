@@ -8,6 +8,7 @@ GitHub Pages で動作する、完全クライアントサイドの領収書PDF�
 
 - `index.html`: 領収書入力フォーム
 - `history.html`: 保存済み履歴一覧
+- `settings.html`: 発行者設定
 - `detail.html`: 保存済み領収書の詳細編集
 - `assets/js/db.js`: Dexie を使った IndexedDB 操作
 - `assets/js/pdf.js`: pdf-lib と fontkit を使った PDF 生成
@@ -30,10 +31,12 @@ GitHub Pages で動作する、完全クライアントサイドの領収書PDF�
 ## 追加機能
 
 - JSON 書き出し / 読み込み
-- 発行者情報の既定値保存
-- 履歴検索
+- JSON 読み込み結果の件数表示
+- 発行者情報の既定値保存 / 設定画面
+- 履歴検索 / 並び順切替
 - `YYYYMM-0001` 形式の採番
 - 長文入力時の PDF レイアウト保護
+- PDF プレビュー
 
 ## PDF
 

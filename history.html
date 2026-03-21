@@ -17,6 +17,7 @@
     <section class="panel">
       <div class="toolbar">
         <a class="button button-secondary" href="./index.html">新規発行へ</a>
+        <a class="button button-secondary" href="./settings.html">発行者設定</a>
         <a class="button button-ghost" href="./guide.html">使い方と保存仕様</a>
         <label class="field search-field">
           <span>取り込みモード</span>
@@ -37,8 +38,19 @@
           <span>検索</span>
           <input id="history-search-input" type="search" placeholder="宛名、番号、発行日、発行者名で検索">
         </label>
+        <label class="field search-field">
+          <span>並び順</span>
+          <select id="history-sort-select">
+            <option value="updatedAt_desc">更新日時が新しい順</option>
+            <option value="issueDate_desc">発行日が新しい順</option>
+            <option value="issueDate_asc">発行日が古い順</option>
+            <option value="receiptNumber_desc">番号が大きい順</option>
+            <option value="receiptNumber_asc">番号が小さい順</option>
+          </select>
+        </label>
       </div>
       <div id="history-error" class="alert alert-error" hidden></div>
+      <div id="history-status" class="alert alert-info" hidden></div>
       <div id="history-empty" class="empty" hidden>
         <p>保存済みの領収書はありません。</p>
       </div>

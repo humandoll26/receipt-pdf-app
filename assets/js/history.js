@@ -24,16 +24,28 @@ import {
 const list = qs("#history-list");
 const empty = qs("#history-empty");
 const errorBox = qs("#history-error");
+const statusBox = qs("#history-status");
 const importModeSelect = qs("#import-mode-select");
 const exportJsonButton = qs("#export-json-button");
 const importJsonButton = qs("#import-json-button");
 const importJsonInput = qs("#import-json-input");
 const searchInput = qs("#history-search-input");
+const sortSelect = qs("#history-sort-select");
 const selectAllButton = qs("#select-all-button");
 const deleteSelectedButton = qs("#delete-selected-button");
 
 let currentRecords = [];
 let allRecords = [];
+
+function clearStatus() {
+  statusBox.textContent = "";
+  statusBox.hidden = true;
+}
+
+function showStatus(message) {
+  statusBox.textContent = message;
+  statusBox.hidden = false;
+}
 
 function getSelectedIds() {
   return Array.from(document.querySelectorAll(".history-select:checked")).map((input) => input.value);
@@ -89,8 +101,26 @@ function renderHistory(records) {
 
 async function refreshHistory() {
   allRecords = await listDocumentsByUpdatedAtDesc(DOC_TYPE);
-  const filtered = allRecords.filter((record) => matchesHistorySearch(record, searchInput.value));
+  const filtered = sortRecords(allRecords.filter((record) => matchesHistorySearch(record, searchInput.value)));
   renderHistory(filtered);
+}
+
+function sortRecords(records) {
+  const mode = sortSelect.value;
+  const items = [...records];
+  if (mode === "issueDate_desc") {
+    return items.sort((a, b) => (b.issueDate || "").localeCompare(a.issueDate || ""));
+  }
+  if (mode === "issueDate_asc") {
+    return items.sort((a, b) => (a.issueDate || "").localeCompare(b.issueDate || ""));
+  }
+  if (mode === "receiptNumber_desc") {
+    return items.sort((a, b) => `${b.receiptNumber || ""}`.localeCompare(`${a.receiptNumber || ""}`));
+  }
+  if (mode === "receiptNumber_asc") {
+    return items.sort((a, b) => `${a.receiptNumber || ""}`.localeCompare(`${b.receiptNumber || ""}`));
+  }
+  return items.sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""));
 }
 
 selectAllButton.addEventListener("click", () => {
@@ -124,11 +154,17 @@ deleteSelectedButton.addEventListener("click", async () => {
 });
 
 searchInput.addEventListener("input", () => {
-  const filtered = allRecords.filter((record) => matchesHistorySearch(record, searchInput.value));
+  const filtered = sortRecords(allRecords.filter((record) => matchesHistorySearch(record, searchInput.value)));
+  renderHistory(filtered);
+});
+
+sortSelect.addEventListener("change", () => {
+  const filtered = sortRecords(allRecords.filter((record) => matchesHistorySearch(record, searchInput.value)));
   renderHistory(filtered);
 });
 
 exportJsonButton.addEventListener("click", async () => {
+  clearStatus();
   setBusyState([exportJsonButton], true, "書き出し中...");
   try {
     const records = await listAllDocuments(DOC_TYPE);
@@ -150,25 +186,37 @@ importJsonInput.addEventListener("change", async () => {
   const file = importJsonInput.files?.[0];
   if (!file) return;
 
+  clearStatus();
   setBusyState([importJsonButton], true, "読み込み中...");
   try {
     const text = await file.text();
     const records = parseBackupPayload(text);
     const mode = importModeSelect.value;
+    let addedCount = 0;
+    let updatedCount = 0;
+    let skippedCount = 0;
     if (mode === "replace") {
       const confirmed = window.confirm("現在の履歴を削除して、JSONの内容で置き換えますか？");
       if (!confirmed) return;
       await clearDocumentsByType(DOC_TYPE);
       await bulkSaveDocuments(records);
+      addedCount = records.length;
     } else if (mode === "skip") {
       const existingRecords = await listAllDocuments(DOC_TYPE);
       const existingIds = new Set(existingRecords.map((record) => record.id));
       const newRecords = records.filter((record) => !existingIds.has(record.id));
+      skippedCount = records.length - newRecords.length;
+      addedCount = newRecords.length;
       await bulkSaveDocuments(newRecords);
     } else {
+      const existingRecords = await listAllDocuments(DOC_TYPE);
+      const existingIds = new Set(existingRecords.map((record) => record.id));
+      addedCount = records.filter((record) => !existingIds.has(record.id)).length;
+      updatedCount = records.length - addedCount;
       await bulkSaveDocuments(records);
     }
     await refreshHistory();
+    showStatus(`取り込み完了: 追加 ${addedCount} 件 / 更新 ${updatedCount} 件 / スキップ ${skippedCount} 件`);
   } catch (error) {
     showError(errorBox, error instanceof Error ? error.message : "JSON読み込みに失敗しました。");
   } finally {

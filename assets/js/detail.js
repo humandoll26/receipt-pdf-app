@@ -1,5 +1,5 @@
 import { deleteDocument, ensureReceiptNumbers, getDocumentById, saveDocument } from "./db.js";
-import { generateAndDownloadReceiptPdf } from "./pdf.js";
+import { generateAndDownloadReceiptPdf, openReceiptPdfPreview } from "./pdf.js";
 import {
   buildReceiptRecord,
   clearError,
@@ -19,6 +19,7 @@ import {
 const form = qs("#detail-form");
 const errorBox = qs("#detail-error");
 const saveButton = qs("#save-button");
+const previewButton = qs("#preview-button");
 const downloadButton = qs("#download-button");
 const deleteButton = qs("#delete-button");
 const createdAtNode = qs("#detail-created-at");
@@ -99,6 +100,32 @@ form.elements.invoiceIssuerStatus.addEventListener("change", () => {
 form.elements.amount.addEventListener("input", () => updateAmountPreview(form));
 form.elements.issuerRegistrationNumber.addEventListener("input", () => ensureRegistrationNumberInput(form));
 
+previewButton.addEventListener("click", async () => {
+  clearError(errorBox);
+  if (!currentRecord) return;
+
+  const fields = serializeForm(form);
+  const errors = validateReceiptFields(fields);
+  if (errors.length > 0) {
+    showError(errorBox, errors);
+    return;
+  }
+
+  setBusyState([saveButton, previewButton, downloadButton, deleteButton], true, "生成中...");
+  try {
+    const previewRecord = buildReceiptRecord(fields, currentRecord.id, currentRecord.createdAt, {
+      receiptNumberPrefix: currentRecord.receiptNumberPrefix,
+      receiptSequence: currentRecord.receiptSequence,
+      receiptNumber: currentRecord.receiptNumber,
+    });
+    await openReceiptPdfPreview(previewRecord);
+  } catch (error) {
+    showError(errorBox, error instanceof Error ? error.message : "PDFプレビューの生成に失敗しました。");
+  } finally {
+    setBusyState([saveButton, previewButton, downloadButton, deleteButton], false);
+  }
+});
+
 downloadButton.addEventListener("click", async () => {
   clearError(errorBox);
   if (!currentRecord) return;
@@ -110,7 +137,7 @@ downloadButton.addEventListener("click", async () => {
     return;
   }
 
-  setBusyState([saveButton, downloadButton, deleteButton], true, "生成中...");
+  setBusyState([saveButton, previewButton, downloadButton, deleteButton], true, "生成中...");
   try {
     const recordForPdf = buildReceiptRecord(fields, currentRecord.id, currentRecord.createdAt, {
       receiptNumberPrefix: currentRecord.receiptNumberPrefix,
@@ -124,7 +151,7 @@ downloadButton.addEventListener("click", async () => {
   } catch (error) {
     showError(errorBox, error instanceof Error ? error.message : "PDF再生成に失敗しました。");
   } finally {
-    setBusyState([saveButton, downloadButton, deleteButton], false);
+    setBusyState([saveButton, previewButton, downloadButton, deleteButton], false);
   }
 });
 

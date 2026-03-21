@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>発行者設定</title>
+  <link rel="stylesheet" href="./assets/css/style.css">
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <p class="eyebrow">Issuer Settings</p>
+      <h1>発行者設定</h1>
+      <p class="lead">よく使う発行者情報を保存して、新規発行時の入力を減らします。</p>
+    </section>
+
+    <section class="panel">
+      <div class="toolbar">
+        <a class="button button-secondary" href="./index.html">新規発行へ</a>
+        <a class="button button-ghost" href="./guide.html">使い方と保存仕様</a>
+      </div>
+      <div id="settings-error" class="alert alert-error" hidden></div>
+      <div id="settings-status" class="alert alert-info" hidden></div>
+      <form id="settings-form" class="form" novalidate>
+        <label class="field">
+          <span>発行区分 <em>必須</em></span>
+          <select name="invoiceIssuerStatus" required>
+            <option value="invoice">インボイス対応あり</option>
+            <option value="standard">通常の領収書</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>発行者名 <em>必須</em></span>
+          <input type="text" name="issuerName" required>
+        </label>
+
+        <label class="field">
+          <span>発行者住所</span>
+          <textarea name="issuerAddress" rows="3"></textarea>
+        </label>
+
+        <label class="field invoice-field">
+          <span>登録番号 <em>必須</em></span>
+          <input type="text" name="issuerRegistrationNumber" placeholder="T1234567890123" value="T" maxlength="14" required>
+        </label>
+
+        <label class="field invoice-field">
+          <span>税率区分 <em>必須</em></span>
+          <select name="taxCategory" required>
+            <option value="10">10% 対象</option>
+            <option value="8">8% 対象</option>
+            <option value="0">非課税</option>
+          </select>
+        </label>
+
+        <label class="field invoice-field">
+          <span>税計算方式 <em>必須</em></span>
+          <select name="taxMode" required>
+            <option value="inclusive">内税</option>
+            <option value="exclusive">外税</option>
+          </select>
+        </label>
+
+        <div class="actions">
+          <button id="settings-save-button" class="button button-primary" type="submit">設定を保存</button>
+          <button id="settings-clear-button" class="button button-secondary" type="button">設定をクリア</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script type="module" src="./assets/js/settings.js"></script>
+</body>
+</html>
