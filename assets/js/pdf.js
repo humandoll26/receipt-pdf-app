@@ -41,7 +41,8 @@ export async function createReceiptPdfBytes(record) {
   pdfDoc.registerFontkit(fontkit);
 
   const fontBytes = await fetchArrayBuffer(FONT_PATH);
-  const jpFont = await pdfDoc.embedFont(fontBytes, { subset: true });
+  // Variable CJK fonts can lose glyphs when subset embedding is used.
+  const jpFont = await pdfDoc.embedFont(fontBytes, { subset: false });
   const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
@@ -124,7 +125,7 @@ export async function createReceiptPdfBytes(record) {
     x: 68,
     y: height - 314,
     size: 26,
-    font: helveticaBold,
+    font: jpFont,
     color: ink,
   });
 
