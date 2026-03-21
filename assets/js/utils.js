@@ -48,12 +48,22 @@ export function amountToDisplayText(amount) {
   return formatCurrency(amount);
 }
 
-export function buildReceiptRecord(fields, existingId = crypto.randomUUID(), createdAt = nowIso()) {
+export function formatReceiptNumber(receiptNumber) {
+  return `No. ${String(receiptNumber).padStart(4, "0")}`;
+}
+
+export function buildReceiptRecord(
+  fields,
+  existingId = crypto.randomUUID(),
+  createdAt = nowIso(),
+  receiptNumber = 1
+) {
   const timestamp = nowIso();
   return {
     id: existingId,
     docType: DOC_TYPE,
     templateVersion: TEMPLATE_VERSION,
+    receiptNumber,
     issueDate: fields.issueDate,
     customerName: fields.customerName,
     amount: Number(fields.amount),

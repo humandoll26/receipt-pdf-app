@@ -1,9 +1,10 @@
-import { deleteDocument, getDocumentById, saveDocument } from "./db.js";
+import { deleteDocument, ensureReceiptNumbers, getDocumentById, saveDocument } from "./db.js";
 import { generateAndDownloadReceiptPdf } from "./pdf.js";
 import {
   buildReceiptRecord,
   clearError,
   formatDateTime,
+  formatReceiptNumber,
   populateForm,
   qs,
   serializeForm,
@@ -19,12 +20,14 @@ const downloadButton = qs("#download-button");
 const deleteButton = qs("#delete-button");
 const createdAtNode = qs("#detail-created-at");
 const updatedAtNode = qs("#detail-updated-at");
+const receiptNumberNode = qs("#detail-receipt-number");
 
 const params = new URLSearchParams(window.location.search);
 const recordId = params.get("id");
 let currentRecord = null;
 
 function syncMeta(record) {
+  receiptNumberNode.textContent = `領収書番号: ${formatReceiptNumber(record.receiptNumber || 1)}`;
   createdAtNode.textContent = `作成日時: ${formatDateTime(record.createdAt)}`;
   updatedAtNode.textContent = `更新日時: ${formatDateTime(record.updatedAt)}`;
 }
@@ -37,6 +40,7 @@ async function loadRecord() {
   }
 
   try {
+    await ensureReceiptNumbers("receipt");
     currentRecord = await getDocumentById(recordId);
     if (!currentRecord) {
       showError(errorBox, "対象の領収書が見つかりません。");
@@ -65,7 +69,12 @@ form.addEventListener("submit", async (event) => {
 
   setBusyState([saveButton, downloadButton, deleteButton], true, "保存中...");
   try {
-    const nextRecord = buildReceiptRecord(fields, currentRecord.id, currentRecord.createdAt);
+    const nextRecord = buildReceiptRecord(
+      fields,
+      currentRecord.id,
+      currentRecord.createdAt,
+      currentRecord.receiptNumber || 1
+    );
     await saveDocument(nextRecord);
     currentRecord = nextRecord;
     syncMeta(currentRecord);
@@ -89,7 +98,12 @@ downloadButton.addEventListener("click", async () => {
 
   setBusyState([saveButton, downloadButton, deleteButton], true, "生成中...");
   try {
-    const recordForPdf = buildReceiptRecord(fields, currentRecord.id, currentRecord.createdAt);
+    const recordForPdf = buildReceiptRecord(
+      fields,
+      currentRecord.id,
+      currentRecord.createdAt,
+      currentRecord.receiptNumber || 1
+    );
     await saveDocument(recordForPdf);
     currentRecord = recordForPdf;
     syncMeta(currentRecord);

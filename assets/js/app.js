@@ -1,8 +1,9 @@
-import { saveDocument } from "./db.js";
+import { getNextReceiptNumber, saveDocument } from "./db.js";
 import { generateAndDownloadReceiptPdf } from "./pdf.js";
 import {
   buildReceiptRecord,
   clearError,
+  DOC_TYPE,
   getTodayString,
   qs,
   serializeForm,
@@ -37,7 +38,8 @@ form.addEventListener("submit", async (event) => {
 
   setBusyState([generateButton, clearButton], true, "生成中...");
   try {
-    const record = buildReceiptRecord(fields);
+    const receiptNumber = await getNextReceiptNumber(DOC_TYPE);
+    const record = buildReceiptRecord(fields, crypto.randomUUID(), undefined, receiptNumber);
     await saveDocument(record);
     await generateAndDownloadReceiptPdf(record);
     form.reset();

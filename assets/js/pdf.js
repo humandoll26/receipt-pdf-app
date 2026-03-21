@@ -1,6 +1,6 @@
 import { PDFDocument, StandardFonts, rgb } from "https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/+esm";
 import fontkit from "https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@1.1.1/+esm";
-import { buildReceiptFileName, downloadBlob, formatCurrency, formatDate } from "./utils.js";
+import { buildReceiptFileName, downloadBlob, formatCurrency, formatDate, formatReceiptNumber } from "./utils.js";
 
 const TEMPLATE_PATH = "./assets/templates/receipt-template.pdf";
 const FONT_PATH = "./assets/fonts/YuMincho.ttf";
@@ -86,6 +86,14 @@ export async function createReceiptPdfBytes(record) {
     size: 11,
     font: jpFont,
     color: soft,
+  });
+
+  page.drawText(formatReceiptNumber(record.receiptNumber || 1), {
+    x: width - 168,
+    y: height - 94,
+    size: 11,
+    font: helveticaBold,
+    color: accent,
   });
 
   page.drawLine({

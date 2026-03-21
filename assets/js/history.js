@@ -1,5 +1,5 @@
 import { listDocumentsByUpdatedAtDesc } from "./db.js";
-import { DOC_TYPE, escapeHtml, formatCurrency, formatDate, formatDateTime, qs, showError } from "./utils.js";
+import { DOC_TYPE, escapeHtml, formatCurrency, formatDate, formatDateTime, formatReceiptNumber, qs, showError } from "./utils.js";
 
 const list = qs("#history-list");
 const empty = qs("#history-empty");
@@ -20,6 +20,7 @@ function renderHistory(records) {
         <span>${escapeHtml(formatCurrency(record.amount))}</span>
       </div>
       <div class="history-item-meta">
+        <span>領収書番号: ${escapeHtml(formatReceiptNumber(record.receiptNumber || 1))}</span>
         <span>発行日: ${escapeHtml(formatDate(record.issueDate))}</span>
         <span>更新日時: ${escapeHtml(formatDateTime(record.updatedAt))}</span>
       </div>
