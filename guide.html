@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>使い方と保存仕様</title>
+  <link rel="stylesheet" href="./assets/css/style.css">
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <p class="eyebrow">Guide</p>
+      <h1>使い方と保存仕様</h1>
+      <p class="lead">このアプリの保存場所、バックアップ方法、利用時に知っておくと良いポイントをまとめています。</p>
+    </section>
+
+    <section class="panel guide-stack">
+      <div class="toolbar">
+        <a class="button button-secondary" href="./index.html">新規発行へ</a>
+        <a class="button button-secondary" href="./history.html">履歴一覧へ</a>
+      </div>
+
+      <section class="guide-block">
+        <h2>保存の仕組み</h2>
+        <p>領収書の履歴は、このブラウザ内の IndexedDB に保存されます。サーバーには送信していません。</p>
+        <p>そのため、使うブラウザを変えると元の履歴はそのままでは見えません。たとえば Safari で作った履歴は Chrome では表示されません。</p>
+      </section>
+
+      <section class="guide-block">
+        <h2>ブラウザを変えるとき</h2>
+        <p>新しいブラウザや別の端末で使う前に、必ず履歴一覧から JSON 書き出しをしてください。</p>
+        <p>移行先のブラウザで JSON 読み込みを行うと、これまでの履歴を復元できます。</p>
+      </section>
+
+      <section class="guide-block">
+        <h2>JSONバックアップ</h2>
+        <p>履歴一覧にある <code>JSON書き出し</code> でバックアップファイルを保存できます。</p>
+        <p><code>JSON読み込み</code> を使うと、書き出したファイルをこのアプリに戻せます。</p>
+        <p>ブラウザのデータ削除や端末変更に備えて、定期的な書き出しをおすすめします。</p>
+      </section>
+
+      <section class="guide-block">
+        <h2>発行者設定</h2>
+        <p>新規発行画面の <code>発行者設定を保存</code> を押すと、発行者名、住所、登録番号、税設定をこのブラウザの localStorage に保存します。</p>
+        <p>これもブラウザごとに別保存です。別ブラウザには自動で共有されません。</p>
+      </section>
+
+      <section class="guide-block">
+        <h2>採番について</h2>
+        <p>領収書番号は <code>YYYYMM-0001</code> 形式で自動採番されます。同じ月の中で連番になります。</p>
+        <p>削除した番号は再利用しません。欠番が出ることがありますが、現在の仕様です。</p>
+      </section>
+
+      <section class="guide-block">
+        <h2>こんなときは</h2>
+        <p>履歴が見えない: 別ブラウザで開いていないか確認してください。</p>
+        <p>端末を変えたい: 先に JSON 書き出しを行い、移行先で JSON 読み込みをしてください。</p>
+        <p>入力を減らしたい: 新規発行画面で発行者設定を保存してください。</p>
+      </section>
+    </section>
+  </main>
+</body>
+</html>

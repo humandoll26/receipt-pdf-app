@@ -158,6 +158,34 @@ select {
   width: 100%;
 }
 
+.guide-stack {
+  display: grid;
+  gap: 16px;
+}
+
+.guide-block {
+  display: grid;
+  gap: 8px;
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+}
+
+.guide-block:first-of-type {
+  border-top: none;
+  padding-top: 4px;
+}
+
+.guide-block h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.guide-block p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
 .button {
   display: inline-flex;
   align-items: center;
