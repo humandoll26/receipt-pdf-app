@@ -142,82 +142,9 @@ export async function createReceiptPdfBytes(record) {
     color: ink,
   });
 
-  page.drawText("但し", {
-    x: 52,
-    y: height - 382,
-    size: 12,
-    font: jpFont,
-    color: soft,
-  });
-
-  page.drawText(record.purpose, {
-    x: 106,
-    y: height - 382,
-    size: 14,
-    font: jpFont,
-    color: ink,
-    maxWidth: width - 158,
-  });
-
-  page.drawText("上記正に領収いたしました。", {
-    x: 52,
-    y: height - 430,
-    size: 12,
-    font: jpFont,
-    color: ink,
-  });
-
-  page.drawText("発行者", {
-    x: 52,
-    y: height - 484,
-    size: 12,
-    font: jpFont,
-    color: soft,
-  });
-
-  drawMultiline(page, jpFont, record.issuerName, {
-    x: 120,
-    y: height - 484,
-    size: 14,
-    lineHeight: 20,
-    maxWidth: width - 172,
-  });
-
-  page.drawText("登録番号", {
-    x: 52,
-    y: height - 528,
-    size: 12,
-    font: jpFont,
-    color: soft,
-  });
-
-  page.drawText(record.issuerRegistrationNumber || "-", {
-    x: 120,
-    y: height - 528,
-    size: 12,
-    font: helveticaBold,
-    color: ink,
-  });
-
-  page.drawText("住所", {
-    x: 52,
-    y: height - 572,
-    size: 12,
-    font: jpFont,
-    color: soft,
-  });
-
-  drawMultiline(page, jpFont, record.issuerAddress || "-", {
-    x: 120,
-    y: height - 572,
-    size: 12,
-    lineHeight: 18,
-    maxWidth: width - 172,
-  });
-
   page.drawText("税区分", {
     x: 52,
-    y: height - 648,
+    y: height - 382,
     size: 12,
     font: jpFont,
     color: soft,
@@ -226,18 +153,91 @@ export async function createReceiptPdfBytes(record) {
   page.drawText(
     `${record.taxModeLabel || "内税"} / ${record.taxRateLabel || "10%対象"} / 対象額 ${formatCurrency(record.taxableAmount || 0)} / 消費税 ${formatCurrency(record.taxAmount || 0)}`,
     {
-      x: 120,
-      y: height - 648,
+      x: 106,
+      y: height - 382,
       size: 11,
       font: jpFont,
       color: ink,
-      maxWidth: width - 172,
+      maxWidth: width - 158,
     }
   );
 
+  page.drawText("但し", {
+    x: 52,
+    y: height - 430,
+    size: 12,
+    font: jpFont,
+    color: soft,
+  });
+
+  page.drawText(record.purpose, {
+    x: 106,
+    y: height - 430,
+    size: 14,
+    font: jpFont,
+    color: ink,
+    maxWidth: width - 158,
+  });
+
+  page.drawText("上記正に領収いたしました。", {
+    x: 52,
+    y: height - 474,
+    size: 12,
+    font: jpFont,
+    color: ink,
+  });
+
+  page.drawText("発行者", {
+    x: 52,
+    y: height - 526,
+    size: 12,
+    font: jpFont,
+    color: soft,
+  });
+
+  drawMultiline(page, jpFont, record.issuerName, {
+    x: 120,
+    y: height - 526,
+    size: 14,
+    lineHeight: 20,
+    maxWidth: width - 172,
+  });
+
+  page.drawText("登録番号", {
+    x: 52,
+    y: height - 570,
+    size: 12,
+    font: jpFont,
+    color: soft,
+  });
+
+  page.drawText(record.issuerRegistrationNumber || "-", {
+    x: 120,
+    y: height - 570,
+    size: 12,
+    font: helveticaBold,
+    color: ink,
+  });
+
+  page.drawText("住所", {
+    x: 52,
+    y: height - 614,
+    size: 12,
+    font: jpFont,
+    color: soft,
+  });
+
+  drawMultiline(page, jpFont, record.issuerAddress || "-", {
+    x: 120,
+    y: height - 614,
+    size: 12,
+    lineHeight: 18,
+    maxWidth: width - 172,
+  });
+
   page.drawText("備考", {
     x: 52,
-    y: height - 694,
+    y: height - 706,
     size: 12,
     font: jpFont,
     color: soft,
@@ -245,7 +245,7 @@ export async function createReceiptPdfBytes(record) {
 
   drawMultiline(page, jpFont, record.note || "-", {
     x: 120,
-    y: height - 694,
+    y: height - 706,
     size: 12,
     lineHeight: 18,
     maxWidth: width - 172,
