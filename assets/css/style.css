@@ -221,11 +221,30 @@ select {
 
 .history-item {
   display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 10px;
   padding: 18px;
   border-radius: 18px;
   border: 1px solid var(--line);
   background: #fff;
+}
+
+.history-item-check {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 4px;
+}
+
+.history-item-check input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+}
+
+.history-item-link {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
 }
 
 .history-item-title {
