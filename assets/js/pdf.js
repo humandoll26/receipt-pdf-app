@@ -3,9 +3,11 @@ import fontkit from "https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@1.1.1/+esm";
 import {
   buildReceiptFileName,
   downloadBlob,
+  fitText,
   formatCurrency,
   formatDate,
   formatReceiptNumber,
+  wrapText,
 } from "./utils.js";
 
 const TEMPLATE_PATH = "./assets/templates/receipt-template.pdf";
@@ -29,7 +31,7 @@ async function loadTemplatePdf() {
 }
 
 function drawMultiline(page, font, text, options) {
-  const lines = `${text || ""}`.split("\n");
+  const lines = wrapText(font, text, options.size, options.maxWidth, options.maxLines || Infinity);
   lines.forEach((line, index) => {
     page.drawText(line, {
       x: options.x,
@@ -94,8 +96,8 @@ export async function createReceiptPdfBytes(record) {
     color: soft,
   });
 
-  page.drawText(formatReceiptNumber(record.receiptNumber || 1), {
-    x: width - 168,
+  page.drawText(formatReceiptNumber(record.receiptNumber || "0000"), {
+    x: width - 190,
     y: height - 94,
     size: 11,
     font: helveticaBold,
@@ -109,10 +111,12 @@ export async function createReceiptPdfBytes(record) {
     thickness: 1,
   });
 
-  page.drawText(`${record.customerName} 様`, {
+  const customerLine = `${record.customerName} 様`;
+  const customerSize = fitText(jpFont, customerLine, 18, 12, width - 104);
+  page.drawText(customerLine, {
     x: 52,
     y: height - 206,
-    size: 18,
+    size: customerSize,
     font: jpFont,
     color: ink,
   });
@@ -153,15 +157,19 @@ export async function createReceiptPdfBytes(record) {
       color: soft,
     });
 
-    page.drawText(
+    drawMultiline(
+      page,
+      jpFont,
       `${record.taxModeLabel || "内税"} / ${record.taxRateLabel || "10%対象"} / 対象額 ${formatCurrency(record.taxableAmount || 0)} / 消費税 ${formatCurrency(record.taxAmount || 0)}`,
       {
         x: 106,
         y: height - 382,
         size: 11,
+        lineHeight: 14,
         font: jpFont,
         color: ink,
         maxWidth: width - 158,
+        maxLines: 2,
       }
     );
   }
@@ -174,18 +182,19 @@ export async function createReceiptPdfBytes(record) {
     color: soft,
   });
 
-  page.drawText(record.purpose, {
+  drawMultiline(page, jpFont, record.purpose, {
     x: 106,
     y: detailTopY,
     size: 14,
-    font: jpFont,
-    color: ink,
+    lineHeight: 18,
     maxWidth: width - 158,
+    maxLines: 2,
+    color: ink,
   });
 
   page.drawText("上記正に領収いたしました。", {
     x: 52,
-    y: detailTopY - 44,
+    y: detailTopY - 56,
     size: 12,
     font: jpFont,
     color: ink,
@@ -205,12 +214,13 @@ export async function createReceiptPdfBytes(record) {
     size: 14,
     lineHeight: 20,
     maxWidth: width - 172,
+    maxLines: 2,
   });
 
   if (record.isInvoiceIssuer !== false) {
     page.drawText("登録番号", {
       x: 52,
-      y: detailTopY - 140,
+      y: detailTopY - 146,
       size: 12,
       font: jpFont,
       color: soft,
@@ -218,7 +228,7 @@ export async function createReceiptPdfBytes(record) {
 
     page.drawText(record.issuerRegistrationNumber || "-", {
       x: 120,
-      y: detailTopY - 140,
+      y: detailTopY - 146,
       size: 12,
       font: helveticaBold,
       color: ink,
@@ -227,7 +237,7 @@ export async function createReceiptPdfBytes(record) {
 
   page.drawText("住所", {
     x: 52,
-    y: detailTopY - (record.isInvoiceIssuer === false ? 140 : 184),
+    y: detailTopY - (record.isInvoiceIssuer === false ? 146 : 190),
     size: 12,
     font: jpFont,
     color: soft,
@@ -235,15 +245,16 @@ export async function createReceiptPdfBytes(record) {
 
   drawMultiline(page, jpFont, record.issuerAddress || "-", {
     x: 120,
-    y: detailTopY - (record.isInvoiceIssuer === false ? 140 : 184),
+    y: detailTopY - (record.isInvoiceIssuer === false ? 146 : 190),
     size: 12,
     lineHeight: 18,
     maxWidth: width - 172,
+    maxLines: 3,
   });
 
   page.drawText("備考", {
     x: 52,
-    y: detailTopY - (record.isInvoiceIssuer === false ? 232 : 276),
+    y: detailTopY - (record.isInvoiceIssuer === false ? 242 : 286),
     size: 12,
     font: jpFont,
     color: soft,
@@ -251,10 +262,11 @@ export async function createReceiptPdfBytes(record) {
 
   drawMultiline(page, jpFont, record.note || "-", {
     x: 120,
-    y: detailTopY - (record.isInvoiceIssuer === false ? 232 : 276),
+    y: detailTopY - (record.isInvoiceIssuer === false ? 242 : 286),
     size: 12,
     lineHeight: 18,
     maxWidth: width - 172,
+    maxLines: 4,
   });
 
   page.drawText(`ID: ${record.id}`, {

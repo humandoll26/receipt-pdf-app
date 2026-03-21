@@ -17,8 +17,17 @@
     <section class="panel">
       <div class="toolbar">
         <a class="button button-secondary" href="./index.html">新規発行へ</a>
+        <button id="export-json-button" class="button button-secondary" type="button">JSON書き出し</button>
+        <button id="import-json-button" class="button button-secondary" type="button">JSON読み込み</button>
         <button id="select-all-button" class="button button-ghost" type="button">全選択</button>
         <button id="delete-selected-button" class="button button-danger" type="button" disabled>選択削除</button>
+        <input id="import-json-input" type="file" accept="application/json" hidden>
+      </div>
+      <div class="toolbar">
+        <label class="field search-field">
+          <span>検索</span>
+          <input id="history-search-input" type="search" placeholder="宛名、番号、発行日、発行者名で検索">
+        </label>
       </div>
       <div id="history-error" class="alert alert-error" hidden></div>
       <div id="history-empty" class="empty" hidden>

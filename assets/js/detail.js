@@ -11,6 +11,7 @@ import {
   setBusyState,
   showError,
   syncInvoiceFields,
+  updateAmountPreview,
   validateReceiptFields,
 } from "./utils.js";
 
@@ -51,6 +52,7 @@ async function loadRecord() {
 
     populateForm(form, currentRecord);
     syncInvoiceFields(form);
+    updateAmountPreview(form);
     syncMeta(currentRecord);
   } catch (error) {
     showError(errorBox, error instanceof Error ? error.message : "領収書の読み込みに失敗しました。");
@@ -71,12 +73,11 @@ form.addEventListener("submit", async (event) => {
 
   setBusyState([saveButton, downloadButton, deleteButton], true, "保存中...");
   try {
-    const nextRecord = buildReceiptRecord(
-      fields,
-      currentRecord.id,
-      currentRecord.createdAt,
-      currentRecord.receiptNumber || 1
-    );
+    const nextRecord = buildReceiptRecord(fields, currentRecord.id, currentRecord.createdAt, {
+      receiptNumberPrefix: currentRecord.receiptNumberPrefix,
+      receiptSequence: currentRecord.receiptSequence,
+      receiptNumber: currentRecord.receiptNumber,
+    });
     await saveDocument(nextRecord);
     currentRecord = nextRecord;
     syncMeta(currentRecord);
@@ -92,6 +93,8 @@ form.elements.invoiceIssuerStatus.addEventListener("change", () => {
   clearError(errorBox);
 });
 
+form.elements.amount.addEventListener("input", () => updateAmountPreview(form));
+
 downloadButton.addEventListener("click", async () => {
   clearError(errorBox);
   if (!currentRecord) return;
@@ -105,12 +108,11 @@ downloadButton.addEventListener("click", async () => {
 
   setBusyState([saveButton, downloadButton, deleteButton], true, "生成中...");
   try {
-    const recordForPdf = buildReceiptRecord(
-      fields,
-      currentRecord.id,
-      currentRecord.createdAt,
-      currentRecord.receiptNumber || 1
-    );
+    const recordForPdf = buildReceiptRecord(fields, currentRecord.id, currentRecord.createdAt, {
+      receiptNumberPrefix: currentRecord.receiptNumberPrefix,
+      receiptSequence: currentRecord.receiptSequence,
+      receiptNumber: currentRecord.receiptNumber,
+    });
     await saveDocument(recordForPdf);
     currentRecord = recordForPdf;
     syncMeta(currentRecord);

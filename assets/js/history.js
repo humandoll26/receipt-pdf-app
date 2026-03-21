@@ -1,13 +1,37 @@
-import { deleteDocument, listDocumentsByUpdatedAtDesc } from "./db.js";
-import { DOC_TYPE, escapeHtml, formatCurrency, formatDate, formatDateTime, formatReceiptNumber, qs, setBusyState, showError } from "./utils.js";
+import {
+  bulkSaveDocuments,
+  deleteDocument,
+  listAllDocuments,
+  listDocumentsByUpdatedAtDesc,
+} from "./db.js";
+import {
+  buildBackupPayload,
+  DOC_TYPE,
+  downloadBlob,
+  escapeHtml,
+  formatCurrency,
+  formatDate,
+  formatDateTime,
+  formatReceiptNumber,
+  matchesHistorySearch,
+  parseBackupPayload,
+  qs,
+  setBusyState,
+  showError,
+} from "./utils.js";
 
 const list = qs("#history-list");
 const empty = qs("#history-empty");
 const errorBox = qs("#history-error");
+const exportJsonButton = qs("#export-json-button");
+const importJsonButton = qs("#import-json-button");
+const importJsonInput = qs("#import-json-input");
+const searchInput = qs("#history-search-input");
 const selectAllButton = qs("#select-all-button");
 const deleteSelectedButton = qs("#delete-selected-button");
 
 let currentRecords = [];
+let allRecords = [];
 
 function getSelectedIds() {
   return Array.from(document.querySelectorAll(".history-select:checked")).map((input) => input.value);
@@ -32,7 +56,9 @@ function renderHistory(records) {
 
   empty.hidden = true;
   selectAllButton.disabled = false;
-  list.innerHTML = records.map((record) => `
+  list.innerHTML = records
+    .map(
+      (record) => `
     <div class="history-item">
       <label class="history-item-check" aria-label="${escapeHtml(record.customerName)} を選択">
         <input class="history-select" type="checkbox" value="${escapeHtml(record.id)}">
@@ -49,7 +75,9 @@ function renderHistory(records) {
         </div>
       </a>
     </div>
-  `).join("");
+  `
+    )
+    .join("");
 
   list.querySelectorAll(".history-select").forEach((input) => {
     input.addEventListener("change", updateSelectionUi);
@@ -58,8 +86,9 @@ function renderHistory(records) {
 }
 
 async function refreshHistory() {
-  const records = await listDocumentsByUpdatedAtDesc(DOC_TYPE);
-  renderHistory(records);
+  allRecords = await listDocumentsByUpdatedAtDesc(DOC_TYPE);
+  const filtered = allRecords.filter((record) => matchesHistorySearch(record, searchInput.value));
+  renderHistory(filtered);
 }
 
 selectAllButton.addEventListener("click", () => {
@@ -89,6 +118,47 @@ deleteSelectedButton.addEventListener("click", async () => {
   } finally {
     setBusyState([selectAllButton, deleteSelectedButton], false);
     updateSelectionUi();
+  }
+});
+
+searchInput.addEventListener("input", () => {
+  const filtered = allRecords.filter((record) => matchesHistorySearch(record, searchInput.value));
+  renderHistory(filtered);
+});
+
+exportJsonButton.addEventListener("click", async () => {
+  setBusyState([exportJsonButton], true, "書き出し中...");
+  try {
+    const records = await listAllDocuments(DOC_TYPE);
+    const payload = buildBackupPayload(records);
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    downloadBlob(blob, `receipt_backup_${new Date().toISOString().slice(0, 10)}.json`);
+  } catch (error) {
+    showError(errorBox, error instanceof Error ? error.message : "JSON書き出しに失敗しました。");
+  } finally {
+    setBusyState([exportJsonButton], false);
+  }
+});
+
+importJsonButton.addEventListener("click", () => {
+  importJsonInput.click();
+});
+
+importJsonInput.addEventListener("change", async () => {
+  const file = importJsonInput.files?.[0];
+  if (!file) return;
+
+  setBusyState([importJsonButton], true, "読み込み中...");
+  try {
+    const text = await file.text();
+    const records = parseBackupPayload(text);
+    await bulkSaveDocuments(records);
+    await refreshHistory();
+  } catch (error) {
+    showError(errorBox, error instanceof Error ? error.message : "JSON読み込みに失敗しました。");
+  } finally {
+    importJsonInput.value = "";
+    setBusyState([importJsonButton], false);
   }
 });
 

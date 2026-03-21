@@ -1,5 +1,7 @@
 export const DOC_TYPE = "receipt";
-export const TEMPLATE_VERSION = "receipt_v3_invoice_toggle";
+export const TEMPLATE_VERSION = "receipt_v4_backup_settings_search";
+
+const ISSUER_SETTINGS_KEY = "receipt_app_issuer_settings_v1";
 
 export function qs(selector, root = document) {
   return root.querySelector(selector);
@@ -100,6 +102,8 @@ export function amountToDisplayText(amount) {
 }
 
 export function formatReceiptNumber(receiptNumber) {
+  const value = `${receiptNumber || ""}`.trim();
+  if (/^\d{6}-\d{4}$/.test(value)) return `No. ${value}`;
   return `No. ${String(receiptNumber).padStart(4, "0")}`;
 }
 
@@ -107,7 +111,7 @@ export function buildReceiptRecord(
   fields,
   existingId = crypto.randomUUID(),
   createdAt = nowIso(),
-  receiptNumber = 1
+  receiptNumberInfo = { receiptNumberPrefix: "", receiptSequence: 1, receiptNumber: "0001" }
 ) {
   const timestamp = nowIso();
   const invoiceIssuerStatus = normalizeInvoiceIssuerStatus(fields.invoiceIssuerStatus);
@@ -116,7 +120,9 @@ export function buildReceiptRecord(
     id: existingId,
     docType: DOC_TYPE,
     templateVersion: TEMPLATE_VERSION,
-    receiptNumber,
+    receiptNumberPrefix: receiptNumberInfo.receiptNumberPrefix,
+    receiptSequence: receiptNumberInfo.receiptSequence,
+    receiptNumber: receiptNumberInfo.receiptNumber,
     issueDate: fields.issueDate,
     customerName: fields.customerName,
     invoiceIssuerStatus,
@@ -125,9 +131,8 @@ export function buildReceiptRecord(
     purpose: fields.purpose,
     issuerName: fields.issuerName,
     issuerAddress: fields.issuerAddress || "",
-    issuerRegistrationNumber: invoiceIssuerStatus === "invoice"
-      ? normalizeRegistrationNumber(fields.issuerRegistrationNumber)
-      : "",
+    issuerRegistrationNumber:
+      invoiceIssuerStatus === "invoice" ? normalizeRegistrationNumber(fields.issuerRegistrationNumber) : "",
     ...taxBreakdown,
     amountText: amountToDisplayText(taxBreakdown.totalAmount),
     note: fields.note || "",
@@ -153,6 +158,18 @@ export function serializeForm(form) {
   };
 }
 
+export function serializeIssuerSettings(form) {
+  const fields = serializeForm(form);
+  return {
+    issuerName: fields.issuerName,
+    issuerAddress: fields.issuerAddress,
+    invoiceIssuerStatus: fields.invoiceIssuerStatus,
+    issuerRegistrationNumber: fields.issuerRegistrationNumber,
+    taxCategory: fields.taxCategory,
+    taxMode: fields.taxMode,
+  };
+}
+
 export function populateForm(form, record) {
   form.elements.customerName.value = record.customerName || "";
   form.elements.amount.value = record.amount ?? "";
@@ -160,11 +177,13 @@ export function populateForm(form, record) {
   form.elements.issueDate.value = record.issueDate || "";
   form.elements.issuerName.value = record.issuerName || "";
   form.elements.issuerAddress.value = record.issuerAddress || "";
-  form.elements.invoiceIssuerStatus.value = record.invoiceIssuerStatus || (record.isInvoiceIssuer === false ? "standard" : "invoice");
+  form.elements.invoiceIssuerStatus.value =
+    record.invoiceIssuerStatus || (record.isInvoiceIssuer === false ? "standard" : "invoice");
   form.elements.issuerRegistrationNumber.value = record.issuerRegistrationNumber || "";
   form.elements.taxCategory.value = record.taxCategory || "10";
   form.elements.taxMode.value = record.taxMode || "inclusive";
   form.elements.note.value = record.note || "";
+  updateAmountPreview(form);
 }
 
 export function clearError(container) {
@@ -224,6 +243,111 @@ export function syncInvoiceFields(form) {
   invoiceFields.forEach((field) => {
     field.hidden = !isInvoice;
   });
+}
+
+export function saveIssuerSettings(settings) {
+  localStorage.setItem(ISSUER_SETTINGS_KEY, JSON.stringify(settings));
+}
+
+export function loadIssuerSettings() {
+  try {
+    const raw = localStorage.getItem(ISSUER_SETTINGS_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function applyIssuerSettings(form, settings, overwrite = false) {
+  if (!settings) return;
+  const keys = [
+    "issuerName",
+    "issuerAddress",
+    "invoiceIssuerStatus",
+    "issuerRegistrationNumber",
+    "taxCategory",
+    "taxMode",
+  ];
+  keys.forEach((key) => {
+    const value = settings[key];
+    const element = form.elements[key];
+    if (!element || value == null) return;
+    if (!overwrite && `${element.value || ""}`.trim()) return;
+    element.value = value;
+  });
+  syncInvoiceFields(form);
+}
+
+export function buildBackupPayload(records) {
+  return {
+    app: "receipt-pdf-app",
+    version: TEMPLATE_VERSION,
+    exportedAt: nowIso(),
+    documents: records,
+  };
+}
+
+export function parseBackupPayload(text) {
+  const parsed = JSON.parse(text);
+  if (!parsed || !Array.isArray(parsed.documents)) {
+    throw new Error("JSONバックアップの形式が正しくありません。");
+  }
+  return parsed.documents;
+}
+
+export function matchesHistorySearch(record, searchTerm) {
+  const normalized = `${searchTerm || ""}`.trim().toLowerCase();
+  if (!normalized) return true;
+  const haystack = [
+    record.customerName,
+    record.receiptNumber,
+    record.issueDate,
+    record.issuerName,
+    record.purpose,
+    record.amountText,
+    record.totalAmount,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  return haystack.includes(normalized);
+}
+
+export function updateAmountPreview(form) {
+  const preview = form.querySelector("[data-amount-preview]");
+  if (!preview) return;
+  const raw = `${form.elements.amount?.value || ""}`.trim();
+  preview.textContent = /^\d+$/.test(raw) ? formatCurrency(raw) : "¥0";
+}
+
+export function fitText(font, text, preferredSize, minSize, maxWidth) {
+  let size = preferredSize;
+  while (size > minSize && font.widthOfTextAtSize(text, size) > maxWidth) {
+    size -= 0.5;
+  }
+  return size;
+}
+
+export function wrapText(font, text, size, maxWidth, maxLines = Infinity) {
+  const rawLines = `${text || ""}`.split("\n");
+  const lines = [];
+  for (const rawLine of rawLines) {
+    let current = "";
+    for (const char of rawLine) {
+      const candidate = current + char;
+      if (font.widthOfTextAtSize(candidate, size) <= maxWidth || current.length === 0) {
+        current = candidate;
+      } else {
+        lines.push(current);
+        current = char;
+      }
+      if (lines.length >= maxLines) break;
+    }
+    if (lines.length >= maxLines) break;
+    lines.push(current || " ");
+    if (lines.length >= maxLines) break;
+  }
+  return lines.slice(0, maxLines);
 }
 
 export function setBusyState(buttons, isBusy, busyLabel = "処理中...") {

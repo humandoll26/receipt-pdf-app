@@ -101,6 +101,11 @@ select {
   font-size: 0.92rem;
 }
 
+.field-help {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
 .field input,
 .field textarea,
 .field select {
@@ -147,6 +152,10 @@ select {
 .toolbar {
   display: grid;
   gap: 12px;
+}
+
+.search-field {
+  width: 100%;
 }
 
 .button {
@@ -253,6 +262,10 @@ select {
   gap: 16px;
   align-items: baseline;
   font-weight: 700;
+}
+
+.history-item-title span:last-child {
+  white-space: nowrap;
 }
 
 .history-item-meta {

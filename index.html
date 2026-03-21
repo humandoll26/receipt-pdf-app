@@ -37,6 +37,7 @@
         <label class="field">
           <span>金額 <em>必須</em></span>
           <input type="number" name="amount" inputmode="numeric" min="0" step="1" required>
+          <small class="field-help" data-amount-preview>¥0</small>
         </label>
 
         <label class="field invoice-field">
@@ -88,6 +89,7 @@
 
         <div class="actions">
           <button id="generate-button" class="button button-primary" type="submit">PDF生成</button>
+          <button id="save-settings-button" class="button button-secondary" type="button">発行者設定を保存</button>
           <button id="clear-button" class="button button-secondary" type="button">入力クリア</button>
           <a class="button button-ghost" href="./history.html">履歴へ</a>
         </div>
