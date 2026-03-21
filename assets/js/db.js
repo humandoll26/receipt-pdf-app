@@ -84,6 +84,10 @@ export async function deleteDocument(id) {
   await db.documents.delete(id);
 }
 
+export async function clearDocumentsByType(docType) {
+  await db.documents.where("docType").equals(docType).delete();
+}
+
 function buildReceiptNumberPrefix(issueDate) {
   const normalized = `${issueDate || ""}`.replaceAll("-", "");
   if (normalized.length >= 6) return normalized.slice(0, 6);

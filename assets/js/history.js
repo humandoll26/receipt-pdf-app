@@ -1,5 +1,6 @@
 import {
   bulkSaveDocuments,
+  clearDocumentsByType,
   deleteDocument,
   listAllDocuments,
   listDocumentsByUpdatedAtDesc,
@@ -23,6 +24,7 @@ import {
 const list = qs("#history-list");
 const empty = qs("#history-empty");
 const errorBox = qs("#history-error");
+const importModeSelect = qs("#import-mode-select");
 const exportJsonButton = qs("#export-json-button");
 const importJsonButton = qs("#import-json-button");
 const importJsonInput = qs("#import-json-input");
@@ -152,7 +154,20 @@ importJsonInput.addEventListener("change", async () => {
   try {
     const text = await file.text();
     const records = parseBackupPayload(text);
-    await bulkSaveDocuments(records);
+    const mode = importModeSelect.value;
+    if (mode === "replace") {
+      const confirmed = window.confirm("現在の履歴を削除して、JSONの内容で置き換えますか？");
+      if (!confirmed) return;
+      await clearDocumentsByType(DOC_TYPE);
+      await bulkSaveDocuments(records);
+    } else if (mode === "skip") {
+      const existingRecords = await listAllDocuments(DOC_TYPE);
+      const existingIds = new Set(existingRecords.map((record) => record.id));
+      const newRecords = records.filter((record) => !existingIds.has(record.id));
+      await bulkSaveDocuments(newRecords);
+    } else {
+      await bulkSaveDocuments(records);
+    }
     await refreshHistory();
   } catch (error) {
     showError(errorBox, error instanceof Error ? error.message : "JSON読み込みに失敗しました。");
