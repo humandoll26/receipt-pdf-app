@@ -24,25 +24,46 @@ export function normalizeRegistrationNumber(value) {
   return `${value || ""}`.trim().toUpperCase();
 }
 
-export function calculateTaxBreakdown(amount, taxCategory) {
-  const total = Number(amount) || 0;
+export function calculateTaxBreakdown(amount, taxCategory, taxMode) {
+  const baseAmount = Number(amount) || 0;
   const rate = Number(taxCategory) || 0;
+  const normalizedTaxMode = taxMode === "exclusive" ? "exclusive" : "inclusive";
+
   if (rate <= 0) {
     return {
       taxCategory: "0",
+      taxMode: normalizedTaxMode,
+      taxModeLabel: normalizedTaxMode === "exclusive" ? "外税" : "内税",
       taxRateLabel: "非課税",
-      taxableAmount: total,
+      taxableAmount: baseAmount,
       taxAmount: 0,
+      totalAmount: baseAmount,
     };
   }
 
-  const taxableAmount = Math.floor((total * 100) / (100 + rate));
-  const taxAmount = total - taxableAmount;
+  if (normalizedTaxMode === "exclusive") {
+    const taxAmount = Math.floor((baseAmount * rate) / 100);
+    return {
+      taxCategory: String(rate),
+      taxMode: normalizedTaxMode,
+      taxModeLabel: "外税",
+      taxRateLabel: `${rate}%対象`,
+      taxableAmount: baseAmount,
+      taxAmount,
+      totalAmount: baseAmount + taxAmount,
+    };
+  }
+
+  const taxableAmount = Math.floor((baseAmount * 100) / (100 + rate));
+  const taxAmount = baseAmount - taxableAmount;
   return {
     taxCategory: String(rate),
+    taxMode: normalizedTaxMode,
+    taxModeLabel: "内税",
     taxRateLabel: `${rate}%対象`,
     taxableAmount,
     taxAmount,
+    totalAmount: baseAmount,
   };
 }
 
@@ -85,6 +106,7 @@ export function buildReceiptRecord(
   receiptNumber = 1
 ) {
   const timestamp = nowIso();
+  const taxBreakdown = calculateTaxBreakdown(fields.amount, fields.taxCategory, fields.taxMode);
   return {
     id: existingId,
     docType: DOC_TYPE,
@@ -93,12 +115,12 @@ export function buildReceiptRecord(
     issueDate: fields.issueDate,
     customerName: fields.customerName,
     amount: Number(fields.amount),
-    amountText: amountToDisplayText(fields.amount),
     purpose: fields.purpose,
     issuerName: fields.issuerName,
     issuerAddress: fields.issuerAddress || "",
     issuerRegistrationNumber: normalizeRegistrationNumber(fields.issuerRegistrationNumber),
-    ...calculateTaxBreakdown(fields.amount, fields.taxCategory),
+    ...taxBreakdown,
+    amountText: amountToDisplayText(taxBreakdown.totalAmount),
     note: fields.note || "",
     createdAt,
     updatedAt: timestamp,
@@ -116,6 +138,7 @@ export function serializeForm(form) {
     issuerAddress: `${formData.get("issuerAddress") || ""}`.trim(),
     issuerRegistrationNumber: normalizeRegistrationNumber(formData.get("issuerRegistrationNumber")),
     taxCategory: `${formData.get("taxCategory") || "10"}`.trim(),
+    taxMode: `${formData.get("taxMode") || "inclusive"}`.trim(),
     note: `${formData.get("note") || ""}`.trim(),
   };
 }
@@ -129,6 +152,7 @@ export function populateForm(form, record) {
   form.elements.issuerAddress.value = record.issuerAddress || "";
   form.elements.issuerRegistrationNumber.value = record.issuerRegistrationNumber || "";
   form.elements.taxCategory.value = record.taxCategory || "10";
+  form.elements.taxMode.value = record.taxMode || "inclusive";
   form.elements.note.value = record.note || "";
 }
 
@@ -170,6 +194,9 @@ export function validateReceiptFields(fields) {
   }
   if (!["10", "8", "0"].includes(fields.taxCategory)) {
     errors.push("税率区分を選択してください。");
+  }
+  if (!["inclusive", "exclusive"].includes(fields.taxMode)) {
+    errors.push("税計算方式を選択してください。");
   }
   return errors;
 }

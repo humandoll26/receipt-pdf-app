@@ -134,7 +134,7 @@ export async function createReceiptPdfBytes(record) {
     borderWidth: 1,
   });
 
-  page.drawText(formatCurrency(record.amount), {
+  page.drawText(formatCurrency(record.totalAmount ?? record.amount), {
     x: 68,
     y: height - 314,
     size: 26,
@@ -224,7 +224,7 @@ export async function createReceiptPdfBytes(record) {
   });
 
   page.drawText(
-    `${record.taxRateLabel || "10%対象"} / 対象額 ${formatCurrency(record.taxableAmount || 0)} / 消費税 ${formatCurrency(record.taxAmount || 0)}`,
+    `${record.taxModeLabel || "内税"} / ${record.taxRateLabel || "10%対象"} / 対象額 ${formatCurrency(record.taxableAmount || 0)} / 消費税 ${formatCurrency(record.taxAmount || 0)}`,
     {
       x: 120,
       y: height - 648,

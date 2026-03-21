@@ -17,7 +17,7 @@ function renderHistory(records) {
     <a class="history-item" href="./detail.html?id=${encodeURIComponent(record.id)}">
       <div class="history-item-title">
         <span>${escapeHtml(record.customerName)}</span>
-        <span>${escapeHtml(formatCurrency(record.amount))}</span>
+        <span>${escapeHtml(formatCurrency(record.totalAmount ?? record.amount))}</span>
       </div>
       <div class="history-item-meta">
         <span>領収書番号: ${escapeHtml(formatReceiptNumber(record.receiptNumber || 1))}</span>
