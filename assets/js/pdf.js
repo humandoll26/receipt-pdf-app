@@ -285,16 +285,3 @@ export async function generateAndDownloadReceiptPdf(record) {
   const blob = new Blob([pdfBytes], { type: "application/pdf" });
   downloadBlob(blob, buildReceiptFileName());
 }
-
-export async function openReceiptPdfPreview(record) {
-  const previewWindow = window.open("", "_blank", "noopener");
-  const pdfBytes = await createReceiptPdfBytes(record);
-  const blob = new Blob([pdfBytes], { type: "application/pdf" });
-  const url = URL.createObjectURL(blob);
-  if (previewWindow) {
-    previewWindow.location.href = url;
-  } else {
-    window.open(url, "_blank", "noopener");
-  }
-  setTimeout(() => URL.revokeObjectURL(url), 60000);
-}

@@ -1,5 +1,5 @@
 import { getNextReceiptNumber, saveDocument } from "./db.js";
-import { generateAndDownloadReceiptPdf, openReceiptPdfPreview } from "./pdf.js";
+import { generateAndDownloadReceiptPdf } from "./pdf.js";
 import {
   applyIssuerSettings,
   buildReceiptRecord,
@@ -22,7 +22,6 @@ import {
 const form = qs("#receipt-form");
 const errorBox = qs("#form-error");
 const generateButton = qs("#generate-button");
-const previewButton = qs("#preview-button");
 const saveSettingsButton = qs("#save-settings-button");
 const clearButton = qs("#clear-button");
 
@@ -44,26 +43,6 @@ saveSettingsButton.addEventListener("click", () => {
   ensureRegistrationNumberInput(form);
   saveIssuerSettings(serializeIssuerSettings(form));
   clearError(errorBox);
-});
-
-previewButton.addEventListener("click", async () => {
-  clearError(errorBox);
-  const fields = serializeForm(form);
-  const errors = validateReceiptFields(fields);
-  if (errors.length > 0) {
-    showError(errorBox, errors);
-    return;
-  }
-
-  setBusyState([generateButton, previewButton, saveSettingsButton, clearButton], true, "生成中...");
-  try {
-    const previewRecord = buildReceiptRecord(fields);
-    await openReceiptPdfPreview(previewRecord);
-  } catch (error) {
-    showError(errorBox, error instanceof Error ? error.message : "PDFプレビューの生成に失敗しました。");
-  } finally {
-    setBusyState([generateButton, previewButton, saveSettingsButton, clearButton], false);
-  }
 });
 
 clearButton.addEventListener("click", () => {
@@ -88,7 +67,7 @@ form.addEventListener("submit", async (event) => {
     return;
   }
 
-  setBusyState([generateButton, previewButton, saveSettingsButton, clearButton], true, "生成中...");
+  setBusyState([generateButton, saveSettingsButton, clearButton], true, "生成中...");
   try {
     const receiptNumberInfo = await getNextReceiptNumber(DOC_TYPE, fields.issueDate);
     const record = buildReceiptRecord(fields, crypto.randomUUID(), undefined, receiptNumberInfo);
@@ -104,6 +83,6 @@ form.addEventListener("submit", async (event) => {
   } catch (error) {
     showError(errorBox, error instanceof Error ? error.message : "PDF生成中にエラーが発生しました。");
   } finally {
-    setBusyState([generateButton, previewButton, saveSettingsButton, clearButton], false);
+    setBusyState([generateButton, saveSettingsButton, clearButton], false);
   }
 });
