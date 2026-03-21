@@ -29,6 +29,23 @@
         </label>
 
         <label class="field">
+          <span>税率区分 <em>必須</em></span>
+          <select name="taxCategory" required>
+            <option value="10">10% 対象</option>
+            <option value="8">8% 対象</option>
+            <option value="0">非課税</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>税計算方式 <em>必須</em></span>
+          <select name="taxMode" required>
+            <option value="inclusive">内税</option>
+            <option value="exclusive">外税</option>
+          </select>
+        </label>
+
+        <label class="field">
           <span>但し書き <em>必須</em></span>
           <input type="text" name="purpose" required>
         </label>
@@ -51,23 +68,6 @@
         <label class="field">
           <span>登録番号 <em>必須</em></span>
           <input type="text" name="issuerRegistrationNumber" placeholder="T1234567890123" required>
-        </label>
-
-        <label class="field">
-          <span>税率区分 <em>必須</em></span>
-          <select name="taxCategory" required>
-            <option value="10">10% 対象</option>
-            <option value="8">8% 対象</option>
-            <option value="0">非課税</option>
-          </select>
-        </label>
-
-        <label class="field">
-          <span>税計算方式 <em>必須</em></span>
-          <select name="taxMode" required>
-            <option value="inclusive">内税</option>
-            <option value="exclusive">外税</option>
-          </select>
         </label>
 
         <label class="field">
