@@ -81,6 +81,66 @@ select {
   backdrop-filter: blur(8px);
 }
 
+.service-card {
+  margin-top: 20px;
+  background: linear-gradient(135deg, rgba(21, 71, 52, 0.08), rgba(235, 227, 209, 0.92));
+  border: 1px solid rgba(21, 71, 52, 0.14);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+
+.service-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.service-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.service-card-head h2 {
+  margin: 0;
+  font-size: 1.18rem;
+}
+
+.service-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(21, 71, 52, 0.12);
+  color: var(--accent-strong);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.service-actions {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.site-footer {
+  padding: 0 16px 28px;
+  text-align: center;
+}
+
+.site-footer a {
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
 .form {
   display: grid;
   gap: 16px;
@@ -368,5 +428,9 @@ select {
 
   .actions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .service-actions {
+    grid-template-columns: minmax(220px, 320px);
   }
 }
