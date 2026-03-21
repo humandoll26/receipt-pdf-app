@@ -10,6 +10,7 @@ import {
   serializeForm,
   setBusyState,
   showError,
+  ensureRegistrationNumberInput,
   syncInvoiceFields,
   updateAmountPreview,
   validateReceiptFields,
@@ -51,6 +52,7 @@ async function loadRecord() {
     }
 
     populateForm(form, currentRecord);
+    ensureRegistrationNumberInput(form);
     syncInvoiceFields(form);
     updateAmountPreview(form);
     syncMeta(currentRecord);
@@ -90,10 +92,12 @@ form.addEventListener("submit", async (event) => {
 
 form.elements.invoiceIssuerStatus.addEventListener("change", () => {
   syncInvoiceFields(form);
+  ensureRegistrationNumberInput(form);
   clearError(errorBox);
 });
 
 form.elements.amount.addEventListener("input", () => updateAmountPreview(form));
+form.elements.issuerRegistrationNumber.addEventListener("input", () => ensureRegistrationNumberInput(form));
 
 downloadButton.addEventListener("click", async () => {
   clearError(errorBox);

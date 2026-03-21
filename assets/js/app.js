@@ -13,6 +13,7 @@ import {
   serializeIssuerSettings,
   setBusyState,
   showError,
+  ensureRegistrationNumberInput,
   syncInvoiceFields,
   updateAmountPreview,
   validateReceiptFields,
@@ -31,12 +32,15 @@ updateAmountPreview(form);
 
 form.elements.invoiceIssuerStatus.addEventListener("change", () => {
   syncInvoiceFields(form);
+  ensureRegistrationNumberInput(form);
   clearError(errorBox);
 });
 
 form.elements.amount.addEventListener("input", () => updateAmountPreview(form));
+form.elements.issuerRegistrationNumber.addEventListener("input", () => ensureRegistrationNumberInput(form));
 
 saveSettingsButton.addEventListener("click", () => {
+  ensureRegistrationNumberInput(form);
   saveIssuerSettings(serializeIssuerSettings(form));
   clearError(errorBox);
 });
@@ -46,6 +50,7 @@ clearButton.addEventListener("click", () => {
   form.elements.issueDate.value = getTodayString();
   form.elements.invoiceIssuerStatus.value = "invoice";
   applyIssuerSettings(form, loadIssuerSettings(), true);
+  ensureRegistrationNumberInput(form);
   syncInvoiceFields(form);
   updateAmountPreview(form);
   clearError(errorBox);
@@ -72,6 +77,7 @@ form.addEventListener("submit", async (event) => {
     form.elements.issueDate.value = getTodayString();
     form.elements.invoiceIssuerStatus.value = "invoice";
     applyIssuerSettings(form, loadIssuerSettings(), true);
+    ensureRegistrationNumberInput(form);
     syncInvoiceFields(form);
     updateAmountPreview(form);
   } catch (error) {

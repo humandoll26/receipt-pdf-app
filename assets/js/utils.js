@@ -23,7 +23,10 @@ export function formatCurrency(value) {
 }
 
 export function normalizeRegistrationNumber(value) {
-  return `${value || ""}`.trim().toUpperCase();
+  const normalized = `${value || ""}`.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const withoutLeadingTs = normalized.replace(/^T+/, "");
+  const withLeadingT = normalized.startsWith("T") ? `T${withoutLeadingTs}` : `T${withoutLeadingTs}`;
+  return withLeadingT.slice(0, 14);
 }
 
 export function calculateTaxBreakdown(amount, taxCategory, taxMode) {
@@ -179,7 +182,7 @@ export function populateForm(form, record) {
   form.elements.issuerAddress.value = record.issuerAddress || "";
   form.elements.invoiceIssuerStatus.value =
     record.invoiceIssuerStatus || (record.isInvoiceIssuer === false ? "standard" : "invoice");
-  form.elements.issuerRegistrationNumber.value = record.issuerRegistrationNumber || "";
+  form.elements.issuerRegistrationNumber.value = normalizeRegistrationNumber(record.issuerRegistrationNumber || "T");
   form.elements.taxCategory.value = record.taxCategory || "10";
   form.elements.taxMode.value = record.taxMode || "inclusive";
   form.elements.note.value = record.note || "";
@@ -275,6 +278,7 @@ export function applyIssuerSettings(form, settings, overwrite = false) {
     if (!overwrite && `${element.value || ""}`.trim()) return;
     element.value = value;
   });
+  ensureRegistrationNumberInput(form);
   syncInvoiceFields(form);
 }
 
@@ -318,6 +322,12 @@ export function updateAmountPreview(form) {
   if (!preview) return;
   const raw = `${form.elements.amount?.value || ""}`.trim();
   preview.textContent = /^\d+$/.test(raw) ? formatCurrency(raw) : "¥0";
+}
+
+export function ensureRegistrationNumberInput(form) {
+  const input = form.elements.issuerRegistrationNumber;
+  if (!input) return;
+  input.value = normalizeRegistrationNumber(input.value || "T");
 }
 
 export function fitText(font, text, preferredSize, minSize, maxWidth) {
