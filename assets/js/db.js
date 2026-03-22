@@ -11,8 +11,25 @@ export async function saveDocument(record) {
   return record;
 }
 
+export async function createDocumentWithNextReceiptNumber(docType, issueDate, buildRecord) {
+  return db.transaction("rw", db.documents, async () => {
+    const records = await db.documents.where("docType").equals(docType).toArray();
+    const receiptNumberInfo = buildNextReceiptNumber(records, issueDate);
+    const record = buildRecord(receiptNumberInfo);
+    await db.documents.put(record);
+    return record;
+  });
+}
+
 export async function bulkSaveDocuments(records) {
   await db.documents.bulkPut(records);
+}
+
+export async function replaceDocumentsByType(docType, records) {
+  await db.transaction("rw", db.documents, async () => {
+    await db.documents.where("docType").equals(docType).delete();
+    await db.documents.bulkPut(records);
+  });
 }
 
 export async function getDocumentById(id) {
@@ -33,18 +50,7 @@ export async function listAllDocuments(docType) {
 export async function getNextReceiptNumber(docType, issueDate) {
   await ensureReceiptNumbers(docType);
   const records = await db.documents.where("docType").equals(docType).toArray();
-  const targetPrefix = buildReceiptNumberPrefix(issueDate);
-  const maxReceiptSequence = records.reduce((max, record) => {
-    if (record.receiptNumberPrefix !== targetPrefix) return max;
-    return Math.max(max, Number(record.receiptSequence) || 0);
-  }, 0);
-
-  const receiptSequence = maxReceiptSequence + 1;
-  return {
-    receiptNumberPrefix: targetPrefix,
-    receiptSequence,
-    receiptNumber: `${targetPrefix}-${String(receiptSequence).padStart(4, "0")}`,
-  };
+  return buildNextReceiptNumber(records, issueDate);
 }
 
 export async function ensureReceiptNumbers(docType) {
@@ -93,6 +99,26 @@ function buildReceiptNumberPrefix(issueDate) {
   if (normalized.length >= 6) return normalized.slice(0, 6);
   const now = new Date();
   return `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function buildNextReceiptNumber(records, issueDate) {
+  const targetPrefix = buildReceiptNumberPrefix(issueDate);
+  const maxReceiptSequence = records.reduce((max, record) => {
+    const prefix =
+      record.receiptNumberPrefix ||
+      extractReceiptNumberPrefix(record.receiptNumber) ||
+      buildReceiptNumberPrefix(record.issueDate);
+    if (prefix !== targetPrefix) return max;
+    const sequence = Number(record.receiptSequence) || extractReceiptSequence(record.receiptNumber) || 0;
+    return Math.max(max, sequence);
+  }, 0);
+
+  const receiptSequence = maxReceiptSequence + 1;
+  return {
+    receiptNumberPrefix: targetPrefix,
+    receiptSequence,
+    receiptNumber: `${targetPrefix}-${String(receiptSequence).padStart(4, "0")}`,
+  };
 }
 
 function extractReceiptNumberPrefix(receiptNumber) {

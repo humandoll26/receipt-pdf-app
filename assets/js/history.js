@@ -1,9 +1,9 @@
 import {
   bulkSaveDocuments,
-  clearDocumentsByType,
   deleteDocument,
   listAllDocuments,
   listDocumentsByUpdatedAtDesc,
+  replaceDocumentsByType,
 } from "./db.js";
 import {
   buildBackupPayload,
@@ -198,8 +198,7 @@ importJsonInput.addEventListener("change", async () => {
     if (mode === "replace") {
       const confirmed = window.confirm("現在の履歴を削除して、JSONの内容で置き換えますか？");
       if (!confirmed) return;
-      await clearDocumentsByType(DOC_TYPE);
-      await bulkSaveDocuments(records);
+      await replaceDocumentsByType(DOC_TYPE, records);
       addedCount = records.length;
     } else if (mode === "skip") {
       const existingRecords = await listAllDocuments(DOC_TYPE);

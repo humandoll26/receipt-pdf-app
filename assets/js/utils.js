@@ -296,6 +296,38 @@ export function parseBackupPayload(text) {
   if (!parsed || !Array.isArray(parsed.documents)) {
     throw new Error("JSONバックアップの形式が正しくありません。");
   }
+  const ids = new Set();
+  parsed.documents.forEach((record, index) => {
+    if (!record || typeof record !== "object" || Array.isArray(record)) {
+      throw new Error(`JSONバックアップの ${index + 1} 件目の形式が正しくありません。`);
+    }
+    const normalizedId = `${record.id || ""}`.trim();
+    if (!normalizedId) {
+      throw new Error(`JSONバックアップの ${index + 1} 件目にIDがありません。`);
+    }
+    if (record.docType !== DOC_TYPE) {
+      throw new Error(`JSONバックアップの ${index + 1} 件目の帳票種別が不正です。`);
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(`${record.issueDate || ""}`)) {
+      throw new Error(`JSONバックアップの ${index + 1} 件目の発行日が不正です。`);
+    }
+    if (`${record.customerName || ""}`.trim() === "") {
+      throw new Error(`JSONバックアップの ${index + 1} 件目の宛名がありません。`);
+    }
+    if (`${record.purpose || ""}`.trim() === "") {
+      throw new Error(`JSONバックアップの ${index + 1} 件目の但し書きがありません。`);
+    }
+    if (`${record.issuerName || ""}`.trim() === "") {
+      throw new Error(`JSONバックアップの ${index + 1} 件目の発行者名がありません。`);
+    }
+    if (!Number.isInteger(record.amount) || record.amount < 0) {
+      throw new Error(`JSONバックアップの ${index + 1} 件目の金額が不正です。`);
+    }
+    if (ids.has(normalizedId)) {
+      throw new Error(`JSONバックアップ内でIDが重複しています: ${normalizedId}`);
+    }
+    ids.add(normalizedId);
+  });
   return parsed.documents;
 }
 

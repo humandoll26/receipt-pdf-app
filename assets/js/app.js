@@ -1,4 +1,4 @@
-import { getNextReceiptNumber, saveDocument } from "./db.js";
+import { createDocumentWithNextReceiptNumber } from "./db.js";
 import { generateAndDownloadReceiptPdf } from "./pdf.js";
 import {
   applyIssuerSettings,
@@ -69,9 +69,9 @@ form.addEventListener("submit", async (event) => {
 
   setBusyState([generateButton, saveSettingsButton, clearButton], true, "生成中...");
   try {
-    const receiptNumberInfo = await getNextReceiptNumber(DOC_TYPE, fields.issueDate);
-    const record = buildReceiptRecord(fields, crypto.randomUUID(), undefined, receiptNumberInfo);
-    await saveDocument(record);
+    const record = await createDocumentWithNextReceiptNumber(DOC_TYPE, fields.issueDate, (receiptNumberInfo) =>
+      buildReceiptRecord(fields, crypto.randomUUID(), undefined, receiptNumberInfo)
+    );
     await generateAndDownloadReceiptPdf(record);
     form.reset();
     form.elements.issueDate.value = getTodayString();
