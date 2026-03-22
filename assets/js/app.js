@@ -26,7 +26,7 @@ const saveSettingsButton = qs("#save-settings-button");
 const clearButton = qs("#clear-button");
 
 form.elements.issueDate.value = getTodayString();
-applyIssuerSettings(form, loadIssuerSettings());
+applyIssuerSettings(form, loadIssuerSettings(), true);
 syncInvoiceFields(form);
 updateAmountPreview(form);
 
